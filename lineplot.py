@@ -20,7 +20,7 @@ def plotting_points_into_shape(points):
         #_____________________________________________________
 
         if float(((p1[0])-(p2[0]))) == 0:#Checking for a zero valued slope
-            m=0.0
+            m=999.0
             print("ZeroDiv")#debugging purposes
         else:
             m = ((p2[1])-(p1[1]))/float(((p2[0])-(p1[0])))#Calculating the slope of the line
@@ -41,8 +41,13 @@ def plotting_points_into_shape(points):
         #Case positive slop and slope > 1 (plotting is the same)
         #case printed in red
         if (m>1.0):
-            step = np.arange(p1[1], p2[1], 1)
-            plt.plot((step-c)/m, step, 'r,')
+            if(m==999.0):
+                print("vertical line")
+                step = np.arange(p1[1], p2[1], 1)
+                plt.plot(step*0 + p1[0], step, 'r,')
+            else:
+                step = np.arange(p1[1], p2[1], 1)
+                plt.plot((step-c)/m, step, 'r,')
 
         #Case negative slope and slope < -1 (plotting is the same)
         #case printed in blue
@@ -50,14 +55,13 @@ def plotting_points_into_shape(points):
             step = np.arange(p2[1], p1[1], 1)
             plt.plot((step-c)/m, step, 'b,')
 
+def main():
+    points1 = [(150,300),(150,400),(570,525),(653,780),(495,780),(350,740),(100,345)]
+    points2 = [(),(),(),(),(),()]
+    plotting_points_into_shape(points1)
     plt.axis([0, 1000, 0, 1000])
     plt.show()
-
-
-def main():
-    points = [(150,300),(450,300),(570,525),(653,780),(495,845),(350,740),(100,345)]
-    plotting_points_into_shape(points)
     
 
 main()
-    
+            
