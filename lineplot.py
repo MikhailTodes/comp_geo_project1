@@ -3,8 +3,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+import os
 
-plotmatrix = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
+plotmatrix1 = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
+plotmatrix2 = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
 floodfillcalls = 0
 
 def bres_check(a):#Rounding off right for bresnan algorthim
@@ -16,8 +18,10 @@ def bres_check(a):#Rounding off right for bresnan algorthim
 
 
 
-def plotting_points_into_shape(points):
-    global plotmatrix
+def plotting_points_into_shape(points, whichmatrix):
+    global plotmatrix1
+    global plotmatrix2
+    plotmatrix = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
     points.append (points[0])#add the first point onto the end to close the hull
 
     for i in range (len(points)-1):#Looping through each pair of point in the list
@@ -81,30 +85,43 @@ def plotting_points_into_shape(points):
             for i in range (p2[1], p1[1]):
                 plotmatrix[bres_check((i-c)/m)][i]=1
                 plt.plot(bres_check((i-c)/m), i, 'b.')
+    if (whichmatrix ==1):
+        plotmatrix1 = plotmatrix
+    else:
+        plotmatrix2 = plotmatrix
 
 
-def flood_fill(start_pointx, start_pointy):
-    global plotmatrix
+def flood_fill_UL(start_pointx,start_pointy):
+    global plotmatrix1
+    global plotmatrix2
     global floodfillcalls
     floodfillcalls += 1 
-    print floodfillcalls
+    #os.system('cls' if os.name == 'nt' else 'clear')
+    #print ("Cells checked: ")
+    print floodfillcalls           
 
-    if (plotmatrix[start_pointx][start_pointy] == 0):
-        plotmatrix[start_pointx][start_pointy] = 1
+    if (plotmatrix1[start_pointx][start_pointy] == 0 and plotmatrix2[start_pointx][start_pointy] == 0):
+        plotmatrix1[start_pointx][start_pointy] = 1
+        plotmatrix2[start_pointx][start_pointy] = 1  
+      
         plt.plot(start_pointx, start_pointy, 'c,')
 
         #UP
-        flood_fill(start_pointx, start_pointy+1)
+        flood_fill_UL(start_pointx, start_pointy+1)
         #Down
-        flood_fill(start_pointx, start_pointy-1)
+        flood_fill_UL(start_pointx, start_pointy-1)
         #Left
-        flood_fill(start_pointx-1, start_pointy)
+        flood_fill_UL(start_pointx-1, start_pointy)
         #Right
-        flood_fill(start_pointx+1, start_pointy)
+        flood_fill_UL(start_pointx+1, start_pointy)
     else:
         return 0
         
 
+
+def find_point_in_two_polys():
+    global plotmatrix1
+    global plotmatrix2
 
 
 
@@ -141,10 +158,10 @@ def convex_hull(points):
 
 
 
-
 def main():
-    global plotmatrix
+    global plotmatrix1
     points = []
+    points2 = []
    
     #__________OPENING A FILE WITH ROBUST CHECKING_____________
     check = 0
@@ -164,8 +181,7 @@ def main():
                     check = 1
                 else:
                     print ("\nFile specified is not correctly formatted")
-                #------------------------------------------------------
-                
+                #------------------------------------------------------                
             except:
                 print ("\nCannot find specified file...")
     #____________________________________________________________
@@ -180,18 +196,45 @@ def main():
             except:
                 check=0
         print 'Points:\n', points
-        plotting_points_into_shape(points)
+        plotting_points_into_shape(points,1)
         #Find a point in the hull to start filling from
         startx = ((points[2][0]+points[0][0])/2)
         starty = ((points[2][1]+points[0][1])/2)
-        #while (plotmatrix[startx][starty]==0):            
-        #flood_fill(startx, starty)
-        #startx-=1
+        #while (plotmatrix[startx][starty]==0): 
+        qflood = raw_input("\nWould you like to flood fill the shape? This may take a while.\nType y for yes or anything else for no: ")
+        if (qflood.lower() == 'y'):
+            try:
+                flood_fill_UL(startx, starty)
+            except (RuntimeError):
+                print ("\nSorry, this shape is too big to complete the recursive floodfill method")
+                print ("\nPlease try again with a smaller shape")
+        
 
 
 
     elif (input_type == 'U'):#U Case (Plotting intersection of 2 polygons)
-        print ("Ucase")
+        current = f.readline()#Reading out the P1
+        while (not check == 0):
+            try:
+                current = f.readline()
+                if (current.strip('\r\n') == 'P2'):
+                    check = 2
+                    current = f.readline()
+                if (check == 1):
+                    current = re.split('[(,)]', current)
+                    temp = [int(current[1]), int(current[2])]
+                    points.append(temp)
+                if (check == 2):
+                    current = re.split('[(,)]', current)
+                    temp = [int(current[1]), int(current[2])]
+                    points2.append(temp)
+            except:
+                check=0
+        print 'Points:\n', points
+        print 'Points2:\n', points2        
+        plotting_points_into_shape(points,1)        
+        plotting_points_into_shape(points2,2)
+        
 
 
 
@@ -210,20 +253,27 @@ def main():
         if len(points) <= 1:
             return 0
         points = convex_hull(points)
-        plotting_points_into_shape(points)
+        plotting_points_into_shape(points,1)
 
-    #Setting the size of the plot to 30 pixels more than max point
-    x_axis=0
-    y_axis=0
+    #______Setting the sixe of the plot axis________
+    y_max = 0
+    x_max = 0
     for i in range (len(points)):
-        if (points[i][0]>x_axis):
-            x_axis = points[i][0]
-        if (points[i][1]>y_axis):
-            y_axis = points[i][1]
-    #_____________________________________________________________
+        if (points[i][1]>y_max):
+            y_max = points[i][1]
+        if (points[i][0]>x_max):
+            x_max = points[i][0]
+    for i in range (len(points2)):
+        if (points2[i][1]>y_max):
+            y_max = points2[i][1]
+        if (points2[i][0]>x_max):
+            x_max = points2[i][0]
+    #_______________________________________________
 
-    plt.axis([0, x_axis+30, 0, y_axis+30])
+    plt.axis([0, x_max+30, 0, y_max+30])
     plt.show()
+    f.close()
+    print ("Thank you for playing")
 
 main()
             
