@@ -185,7 +185,7 @@ def main():
         startx = ((points[2][0]+points[0][0])/2)
         starty = ((points[2][1]+points[0][1])/2)
         #while (plotmatrix[startx][starty]==0):            
-        flood_fill(startx, starty)
+        #flood_fill(startx, starty)
         #startx-=1
 
 
@@ -212,11 +212,17 @@ def main():
         points = convex_hull(points)
         plotting_points_into_shape(points)
 
+    #Setting the size of the plot to 30 pixels more than max point
+    x_axis=0
+    y_axis=0
+    for i in range (len(points)):
+        if (points[i][0]>x_axis):
+            x_axis = points[i][0]
+        if (points[i][1]>y_axis):
+            y_axis = points[i][1]
+    #_____________________________________________________________
 
-
-
-
-    plt.axis([0, 1100, 0, 1100])
+    plt.axis([0, x_axis+30, 0, y_axis+30])
     plt.show()
 
 main()
