@@ -3,6 +3,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+from PIL import Image
+import PIL
 
 plotmatrix1 = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
 plotmatrix2 = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
@@ -107,7 +109,24 @@ def flood_fill_UL(start_pointx,start_pointy):
         flood_fill_UL(start_pointx+1, start_pointy)
     else:
         return 0
-        
+
+
+def flood_fill_UL_nonrecurse(start_pointx, start_pointy):
+    global plotmatrix1
+    global plotmatrix2
+    fill_set = set()
+    fill_set.add((start_pointx, start_pointy))
+    while fill_set:
+        (x,y) = fill_set.pop()
+        if not plotmatrix1[x][y] and not plotmatrix2[x][y]:
+            # plt.plot(x, y, 'co')
+            fill_set.add((x,y+1))
+            fill_set.add((x,y-1))
+            fill_set.add((x-1,y))
+            fill_set.add((x+1,y))
+            plotmatrix1[x][y] = 1
+            plotmatrix2[x][y] = 1
+    return
 
 
 def find_point_in_two_polys():
@@ -210,7 +229,8 @@ def main():
         qflood = raw_input("\nWould you like to flood fill the shape? This may take a while.\nType y for yes or anything else for no: ")
         if (qflood.lower() == 'y'):
             try:
-                flood_fill_UL(startx, starty)
+                # flood_fill_UL(startx, starty)
+                flood_fill_UL_nonrecurse(startx, starty)
             except (RuntimeError):
                 print ("\nSorry, this shape is too big to complete the recursive floodfill method")
                 print ("\nPlease try again with a smaller shape")
@@ -278,9 +298,13 @@ def main():
     #_______________________________________________
 
     plt.axis([0, x_max+80, 0, y_max+80])
+    imgarr = np.array(plotmatrix1, dtype=np.uint8)
+    imgarr = np.swapaxes(imgarr, 0, 1)
+    plt.imshow(imgarr, cmap='gray_r', alpha=0.2, zorder=-10, origin='lower')
     plt.show()
     f.close()
     print ("Thank you for playing")
 
-main()
-            
+if __name__ == '__main__':
+    main()
+
