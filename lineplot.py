@@ -95,11 +95,6 @@ def flood_fill_UL(start_pointx,start_pointy):
         plotmatrix1[start_pointx][start_pointy] = 1
         plotmatrix2[start_pointx][start_pointy] = 1  
 
-        #Check cube each time
-        #if (plotmatrix1[start_pointx][start_pointy] == 0 and plotmatrix2[start_pointx][start_pointy] == 0):
-        #    plotmatrix1[start_pointx][start_pointy] = 1
-        #    plotmatrix2[start_pointx][start_pointy] = 1
-      
         plt.plot(start_pointx, start_pointy, 'co')
 
         #UP
@@ -282,7 +277,7 @@ def main():
             x_max = points2[i][0]
     #_______________________________________________
 
-    plt.axis([0, x_max+20, 0, y_max+20])
+    plt.axis([0, x_max+80, 0, y_max+80])
     plt.show()
     f.close()
     print ("Thank you for playing")
