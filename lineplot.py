@@ -3,7 +3,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import re
-import os
 
 plotmatrix1 = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
 plotmatrix2 = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
@@ -42,12 +41,6 @@ def plotting_points_into_shape(points, whichmatrix):
         else:
             m = ((p2[1])-(p1[1]))/float(((p2[0])-(p1[0])))#Calculating the slope of the line
         c = p1[1]-m*p1[0]#Calculating the intercept
-
-        #debugging purposes
-        #print (i)
-        #print (m)
-        #print (c)
-        #print
 
         #Cases with both positive and negative slopes but -1 < slope < 1 (plotting is the same)
         #Cases printed in green
@@ -94,17 +87,20 @@ def plotting_points_into_shape(points, whichmatrix):
 def flood_fill_UL(start_pointx,start_pointy):
     global plotmatrix1
     global plotmatrix2
-    global floodfillcalls
-    floodfillcalls += 1 
-    #os.system('cls' if os.name == 'nt' else 'clear')
-    #print ("Cells checked: ")
-    print floodfillcalls           
+    #global floodfillcalls
+    #floodfillcalls += 1 
+    #print floodfillcalls           
 
     if (plotmatrix1[start_pointx][start_pointy] == 0 and plotmatrix2[start_pointx][start_pointy] == 0):
         plotmatrix1[start_pointx][start_pointy] = 1
         plotmatrix2[start_pointx][start_pointy] = 1  
+
+        #Check cube each time
+        #if (plotmatrix1[start_pointx][start_pointy] == 0 and plotmatrix2[start_pointx][start_pointy] == 0):
+        #    plotmatrix1[start_pointx][start_pointy] = 1
+        #    plotmatrix2[start_pointx][start_pointy] = 1
       
-        plt.plot(start_pointx, start_pointy, 'c,')
+        plt.plot(start_pointx, start_pointy, 'co')
 
         #UP
         flood_fill_UL(start_pointx, start_pointy+1)
@@ -122,6 +118,25 @@ def flood_fill_UL(start_pointx,start_pointy):
 def find_point_in_two_polys():
     global plotmatrix1
     global plotmatrix2
+    interceptions = []
+    
+    for i in range (0, 1099):
+        for j in range (0, 1099):
+            if (plotmatrix1[j][i]==1 and plotmatrix2[j][i]==1):
+                interceptions.append([j,i])
+    #Find a point in the hull to start filling from
+    try:
+        startx = ((interceptions[1][0]+interceptions[0][0])/2)
+        starty = ((interceptions[1][1]+interceptions[0][1])/2)
+    except:
+        print("These two polygons have no union")
+        return 0
+    qflood = raw_input("\nWould you like to flood fill the union? This may take a while.\nType y for yes or anything else for no: ")
+    if (qflood.lower() == 'y'):
+        try:
+            flood_fill_UL(startx, starty)
+        except (RuntimeError):
+            print ("\nSorry, this union is too big to complete the recursive floodfill method")
 
 
 
@@ -149,10 +164,6 @@ def convex_hull(points):
  
     return lower[:-1] + upper[:-1]#Return the lower and upper hulls that were built
                                   #(minus the last element which is repeated as the first element in each list)
-
-
-
-
 
 
 
@@ -234,6 +245,7 @@ def main():
         print 'Points2:\n', points2        
         plotting_points_into_shape(points,1)        
         plotting_points_into_shape(points2,2)
+        find_point_in_two_polys()
         
 
 
@@ -270,7 +282,7 @@ def main():
             x_max = points2[i][0]
     #_______________________________________________
 
-    plt.axis([0, x_max+30, 0, y_max+30])
+    plt.axis([0, x_max+20, 0, y_max+20])
     plt.show()
     f.close()
     print ("Thank you for playing")
