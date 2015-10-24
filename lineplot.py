@@ -83,6 +83,32 @@ def plotting_points_into_shape(points, whichmatrix):
     else:
         plotmatrix2 = plotmatrix
 
+def iterative_flood_fill(start_pointx,start_pointy):
+    global plotmatrix1
+    global plotmatrix2
+    startx = start_pointx
+    starty = start_pointy
+    #global floodfillcalls
+    #floodfillcalls += 1 
+    #print floodfillcalls           
+    
+    while (plotmatrix1[start_pointx][start_pointy] == 0 and plotmatrix2[start_pointx][start_pointy] == 0):
+        plotmatrix1[start_pointx][start_pointy] = 1
+        plotmatrix2[start_pointx][start_pointy] = 1  
+
+        plt.plot(start_pointx, start_pointy, 'co')
+        
+        while (plotmatrix1[start_pointx][start_pointy+1] == 0 and plotmatrix2[start_pointx][start_pointy+1] == 0):
+            plotmatrix1[start_pointx][start_pointy+1] = 1
+            plotmatrix2[start_pointx][start_pointy+1] = 1  
+
+            plt.plot(start_pointx, start_pointy+1, 'co')
+            start_pointy +=1
+        start_pointx +=1
+        start_pointy = starty
+   
+      
+
 
 def flood_fill_UL(start_pointx,start_pointy):
     global plotmatrix1
@@ -210,7 +236,7 @@ def main():
         qflood = raw_input("\nWould you like to flood fill the shape? This may take a while.\nType y for yes or anything else for no: ")
         if (qflood.lower() == 'y'):
             try:
-                flood_fill_UL(startx, starty)
+                iterative_flood_fill(startx, starty)
             except (RuntimeError):
                 print ("\nSorry, this shape is too big to complete the recursive floodfill method")
                 print ("\nPlease try again with a smaller shape")
