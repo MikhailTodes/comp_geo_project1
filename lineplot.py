@@ -100,6 +100,7 @@ def flood_fill_pathplanner(start_pointx,start_pointy):
             Q.append ([current_point[0], current_point[1]-1])#Down
             Q.append ([current_point[0]-1, current_point[1]])#Left
             Q.append ([current_point[0]+1, current_point[1]])#Right
+    return
         
 
 def find_point_in_two_polys():
@@ -118,14 +119,10 @@ def find_point_in_two_polys():
     except:
         print("These two polygons have no union")
         return 0
-    qflood = raw_input("\nWould you like to flood fill the union? This may take a while.\nType y for yes or anything else for no: ")
+    qflood = raw_input("\nWould you like to flood fill the union?\nType y for yes or anything else for no: ")
     if (qflood.lower() == 'y'):
-        try:
-            flood_fill_pathplanner(startx, starty)
-        except (RuntimeError):
-            print ("\nSorry, this union is too big to complete the recursive floodfill method")
-
-
+        flood_fill_pathplanner(startx, starty)
+        
 
 def convex_hull(points):
 
@@ -198,16 +195,10 @@ def main():
         #Find a point in the hull to start filling from
         startx = ((points[2][0]+points[0][0])/2)
         starty = ((points[2][1]+points[0][1])/2)
-        #while (plotmatrix[startx][starty]==0): 
-        qflood = raw_input("\nWould you like to flood fill the shape? This may take a while.\nType y for yes or anything else for no: ")
+        qflood = raw_input("\nWould you like to flood fill the shape?\nType y for yes or anything else for no: ")
         if (qflood.lower() == 'y'):
-            try:
-                flood_fill_pathplanner(startx, starty)
-            except (RuntimeError):
-                print ("\nSorry, this shape is too big to complete the recursive floodfill method")
-                print ("\nPlease try again with a smaller shape")
-        
-
+            flood_fill_pathplanner(startx, starty)
+            
 
 
     elif (input_type == 'U'):#U Case (Plotting intersection of 2 polygons)
