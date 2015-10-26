@@ -3,6 +3,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+from PIL import Image
+import PIL
 
 plotmatrix1 = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
 plotmatrix2 = [[0]*1100 for i in range(1100)]#Matrix to keep track of plotted pixels
@@ -83,58 +85,22 @@ def plotting_points_into_shape(points, whichmatrix):
     else:
         plotmatrix2 = plotmatrix
 
-def iterative_flood_fill(start_pointx,start_pointy):
+def flood_fill_pathplanner(start_pointx,start_pointy):
     global plotmatrix1
     global plotmatrix2
-    startx = start_pointx
-    starty = start_pointy
-    #global floodfillcalls
-    #floodfillcalls += 1 
-    #print floodfillcalls           
-    
-    while (plotmatrix1[start_pointx][start_pointy] == 0 and plotmatrix2[start_pointx][start_pointy] == 0):
-        plotmatrix1[start_pointx][start_pointy] = 1
-        plotmatrix2[start_pointx][start_pointy] = 1  
+    Q = [[start_pointx, start_pointy]]
 
-        plt.plot(start_pointx, start_pointy, 'co')
+    while (len(Q)>0):
+        current_point = Q.pop(0)
+        if (plotmatrix1[current_point[0]][current_point[1]] == 0 and plotmatrix2[current_point[0]][current_point[1]] == 0):
+            plotmatrix1[current_point[0]][current_point[1]] = 1
+            plotmatrix2[current_point[0]][current_point[1]] = 1 
+            
+            Q.append ([current_point[0], current_point[1]+1])#Up
+            Q.append ([current_point[0], current_point[1]-1])#Down
+            Q.append ([current_point[0]-1, current_point[1]])#Left
+            Q.append ([current_point[0]+1, current_point[1]])#Right
         
-        while (plotmatrix1[start_pointx][start_pointy+1] == 0 and plotmatrix2[start_pointx][start_pointy+1] == 0):
-            plotmatrix1[start_pointx][start_pointy+1] = 1
-            plotmatrix2[start_pointx][start_pointy+1] = 1  
-
-            plt.plot(start_pointx, start_pointy+1, 'co')
-            start_pointy +=1
-        start_pointx +=1
-        start_pointy = starty
-   
-      
-
-
-def flood_fill_UL(start_pointx,start_pointy):
-    global plotmatrix1
-    global plotmatrix2
-    #global floodfillcalls
-    #floodfillcalls += 1 
-    #print floodfillcalls           
-
-    if (plotmatrix1[start_pointx][start_pointy] == 0 and plotmatrix2[start_pointx][start_pointy] == 0):
-        plotmatrix1[start_pointx][start_pointy] = 1
-        plotmatrix2[start_pointx][start_pointy] = 1  
-
-        plt.plot(start_pointx, start_pointy, 'co')
-
-        #UP
-        flood_fill_UL(start_pointx, start_pointy+1)
-        #Down
-        flood_fill_UL(start_pointx, start_pointy-1)
-        #Left
-        flood_fill_UL(start_pointx-1, start_pointy)
-        #Right
-        flood_fill_UL(start_pointx+1, start_pointy)
-    else:
-        return 0
-        
-
 
 def find_point_in_two_polys():
     global plotmatrix1
@@ -155,7 +121,7 @@ def find_point_in_two_polys():
     qflood = raw_input("\nWould you like to flood fill the union? This may take a while.\nType y for yes or anything else for no: ")
     if (qflood.lower() == 'y'):
         try:
-            flood_fill_UL(startx, starty)
+            flood_fill_pathplanner(startx, starty)
         except (RuntimeError):
             print ("\nSorry, this union is too big to complete the recursive floodfill method")
 
@@ -236,7 +202,7 @@ def main():
         qflood = raw_input("\nWould you like to flood fill the shape? This may take a while.\nType y for yes or anything else for no: ")
         if (qflood.lower() == 'y'):
             try:
-                iterative_flood_fill(startx, starty)
+                flood_fill_pathplanner(startx, starty)
             except (RuntimeError):
                 print ("\nSorry, this shape is too big to complete the recursive floodfill method")
                 print ("\nPlease try again with a smaller shape")
@@ -304,6 +270,9 @@ def main():
     #_______________________________________________
 
     plt.axis([0, x_max+80, 0, y_max+80])
+    imgarr = np.array(plotmatrix1, dtype=np.uint8)
+    imgarr = np.swapaxes(imgarr, 0, 1)
+    plt.imshow(imgarr, cmap='gray_r', alpha=0.2, zorder=-10, origin='lower')
     plt.show()
     f.close()
     print ("Thank you for playing")
