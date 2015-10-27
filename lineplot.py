@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import matplotlib.pyplot as plt
+import matplotlib.colors as col
 import numpy as np
 import re
 from PIL import Image
@@ -28,8 +29,7 @@ def plotting_points_into_shape(points, whichmatrix):
     for i in range (len(points)-1):#Looping through each pair of point in the list
         p1 = points [i]#Save the first point for comparison into var p1
         p2 = points [i+1]#Save the second point for comparison into var p2
-        #print (p1  , p2)
-
+     
         #----Make sure always plotting from left to right-----
         if(p1[0]>p2[0]):
             temp = p2
@@ -39,7 +39,6 @@ def plotting_points_into_shape(points, whichmatrix):
 
         if float(((p1[0])-(p2[0]))) == 0:#Checking for a zero valued slope
             m=999.0
-            print("ZeroDiv")#debugging purposes
         else:
             m = ((p2[1])-(p1[1]))/float(((p2[0])-(p1[0])))#Calculating the slope of the line
         c = p1[1]-m*p1[0]#Calculating the intercept
@@ -47,36 +46,31 @@ def plotting_points_into_shape(points, whichmatrix):
         #Cases with both positive and negative slopes but -1 < slope < 1 (plotting is the same)
         #Cases printed in green
         if (m>=-1.0 and m<=1.0):
-            #step = np.arange(p1[0], p2[0], 1)
             for i in range (p1[0], p2[0]):
                 plotmatrix[i][bres_check(m*i+c)]=1
                 plt.plot(i, bres_check(m*i+c), 'g.')
 
         #Case positive slop and slope > 1 (plotting is the same)
-        #case printed in red
+        #case printed in cyan
         if (m>1.0):
             if(m==999.0):
-                #print("vertical line")
                 #----Make sure always plotting from bottom to top-----
                 if(p1[1]>p2[1]):
                     temp = p2
                     p2 = p1
                     p1 = temp
                 #______________________________________________________
-                #step = np.arange(p1[1], p2[1], 1)
                 for i in range (p1[1], p2[1]):
                     plotmatrix[p1[0]][i]=1
-                    plt.plot(i*0+p1[0], i, 'r.')
+                    plt.plot(i*0+p1[0], i, 'c.')
             else:
-                #step = np.arange(p1[1], p2[1], 1)
                 for i in range (p1[1], p2[1]):
                     plotmatrix[bres_check((i-c)/m)][i]=1
-                    plt.plot(bres_check((i-c)/m), i, 'r.')
+                    plt.plot(bres_check((i-c)/m), i, 'c.')
 
         #Case negative slope and slope < -1 (plotting is the same)
         #case printed in blue
         if (m<-1.0):
-            #step = np.arange(p2[1], p1[1], 1)
             for i in range (p2[1], p1[1]):
                 plotmatrix[bres_check((i-c)/m)][i]=1
                 plt.plot(bres_check((i-c)/m), i, 'b.')
@@ -85,7 +79,7 @@ def plotting_points_into_shape(points, whichmatrix):
     else:
         plotmatrix2 = plotmatrix
 
-def flood_fill_pathplanner(start_pointx,start_pointy):
+def flood_fill_pathplanner(start_pointx,start_pointy):#Path planner algorithm
     global plotmatrix1
     global plotmatrix2
     Q = [[start_pointx, start_pointy]]
@@ -102,6 +96,27 @@ def flood_fill_pathplanner(start_pointx,start_pointy):
             Q.append ([current_point[0]+1, current_point[1]])#Right
     return
         
+def flood_fill_Recursive(start_pointx,start_pointy):#Recusive flood fill goes too deep
+    global plotmatrix1
+    global plotmatrix2         
+
+    if (plotmatrix1[start_pointx][start_pointy] == 0 and plotmatrix2[start_pointx][start_pointy] == 0):
+        plotmatrix1[start_pointx][start_pointy] = 1
+        plotmatrix2[start_pointx][start_pointy] = 1  
+
+        plt.plot(start_pointx, start_pointy, 'co')
+
+        #UP
+        flood_fill_Recursive(start_pointx, start_pointy+1)
+        #Down
+        flood_fill_Recursive(start_pointx, start_pointy-1)
+        #Left
+        flood_fill_Recursive(start_pointx-1, start_pointy)
+        #Right
+        flood_fill_Recursive(start_pointx+1, start_pointy)
+    else:
+        return 0
+
 
 def find_point_in_two_polys():
     global plotmatrix1
@@ -126,9 +141,6 @@ def find_point_in_two_polys():
 
 def convex_hull(points):
 
-    # 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
-    # Returns a positive value, if OAB makes a counter-clockwise turn,
-    # negative for clockwise turn, and zero if the points are collinear.
     def cross(o, a, b):
         return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
 
@@ -263,7 +275,16 @@ def main():
     plt.axis([0, x_max+80, 0, y_max+80])
     imgarr = np.array(plotmatrix1, dtype=np.uint8)
     imgarr = np.swapaxes(imgarr, 0, 1)
-    plt.imshow(imgarr, cmap='gray_r', alpha=0.2, zorder=-10, origin='lower')
+    cdict = {'red': ((0.0, 0.0, 5.0),
+                 (1.0, 1.0, 4.0)),
+
+        'green': ((0.0, 1.0, 1.0),
+                  (1.0, 0.0, 0.2)),
+
+        'blue': ((0.0, 1.0, 1.0),
+                 (1.0, 0.0, 0.2))}
+    my_cmap = col.LinearSegmentedColormap('my_colormap', cdict)
+    plt.imshow(imgarr, cmap=my_cmap, alpha=0.2, zorder=-10, origin='lower')
     plt.show()
     f.close()
     print ("Thank you for playing")
